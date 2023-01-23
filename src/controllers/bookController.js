@@ -4,6 +4,7 @@ const userModel = require('../models/userModel')
 const book = async function (req, res) {
     try {
         let data = req.body
+        // const isbnRegex = (?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$)[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$
         let validUser = await userModel.findById({ _id: data.userId })
         if (!validUser) return res.status(400).send({ status: false, msg: "Invalid UserID" })
         let createBook = await bookModel.create(data)

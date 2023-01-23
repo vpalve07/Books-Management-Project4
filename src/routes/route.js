@@ -1,6 +1,7 @@
 const express = require('express')
 const { book, getBooks } = require('../controllers/bookController')
 const { user, login } = require('../controllers/userController')
+const { tokenValidate } = require('../Middlewares/authMiddleware')
 const router = express.Router()
 
 router.get('/test-me', function (req, res) {
@@ -12,7 +13,7 @@ router.post('/register',user)
 router.post('/login',login)
 
 
-router.post('/books',book)
+router.post('/books', tokenValidate, book)
 router.get('/books',getBooks)
 
 
