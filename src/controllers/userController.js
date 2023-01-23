@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 
 const user = async function (req, res) {
     try {
-        let phEmail = []
         let data = req.body
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, Msg: "Request Body can't be empty" })
         let { title, name, phone, email, password, address } = data
@@ -33,10 +32,10 @@ const user = async function (req, res) {
         if (!emailRegex.test(data.email)) return res.status(400).send({ status: false, Msg: "email format is Invalid" })
         if (!passwordRegex.test(data.password)) return res.status(400).send({ status: false, Msg: "Password should contain at least 8 characters with 1 upper and lower case" })
 
+        let findEmailPhone = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
+        if (findEmailPhone) return res.status(403).send({ status: false, msg: "Email Id or Phone Number is already exist" })
+
         let createUser = await userModel.create(data)
-        // let {phone,email} = createUser
-        phEmail.push(createUser)
-        console.log(phEmail)
         return res.status(201).send({ status: true, data: createUser })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
@@ -46,10 +45,17 @@ const user = async function (req, res) {
 const login = async function (req, res) {
     try {
         let data = req.body
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "request body cant be empty" })
+
+        let { password, email } = data
+        if (!password) return res.status(400).send({ status: false, msg: "password is mandatory" })
+        if (!email) return res.status(400).send({ status: false, msg: "email is mandatory" })
+        if (Object.keys(data).length > 2) return res.status(400).send({ status: false, msg: "request body can only contain email and password" })
+
         let findUser = await userModel.findOne(data)
         if (!findUser) res.status(400).send({ status: false, msg: "Invalid credentials" })
         let payload = { userId: findUser._id.toString(), email: findUser.email, iat: Math.floor(Date.now() / 1000) }  //,iat: Math.floor(Date.now() / 1000),exp: Math.floor(Date.now() / 1000) + (30 * 60)
-        let token = jwt.sign(payload, 'group12', { expiresIn: '30s' })
+        let token = jwt.sign(payload, 'group12', { expiresIn: '30m' })
         return res.status(200).send({ status: true, data: token })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })

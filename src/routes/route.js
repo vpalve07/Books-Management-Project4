@@ -9,14 +9,14 @@ router.get('/test-me', function (req, res) {
 })
 
 
-router.post('/register',user)
-router.post('/login',login)
+router.post('/register', user)
+router.post('/login', login)
 
 
 router.post('/books', tokenValidate, book)
-router.get('/books',getBooks)
+router.get('/books', getBooks)
 
 
-router.all("/*",function(req,res){res.status(404).send({status:false,msg:"Invalid HTTP request"})})
+router.all("/*", function (req, res) { res.status(404).send({ status: false, msg: "Invalid HTTP request" }) })
 
 module.exports = router
