@@ -36,7 +36,7 @@ const user = async function (req, res) {
         if (findEmailPhone) return res.status(403).send({ status: false, msg: "Email Id or Phone Number is already exist" })
 
         let createUser = await userModel.create(data)
-        return res.status(201).send({ status: true, data: createUser })
+        return res.status(201).send({ status: true, message: 'Success', data: createUser })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
     }
@@ -56,7 +56,7 @@ const login = async function (req, res) {
         if (!findUser) res.status(400).send({ status: false, msg: "Invalid credentials" })
         let payload = { userId: findUser._id.toString(), email: findUser.email, iat: Math.floor(Date.now() / 1000) }  //,iat: Math.floor(Date.now() / 1000),exp: Math.floor(Date.now() / 1000) + (30 * 60)
         let token = jwt.sign(payload, 'group12', { expiresIn: '30m' })
-        return res.status(200).send({ status: true, data: token })
+        return res.status(200).send({ status: true, message: 'Success' ,data: token })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
     }
