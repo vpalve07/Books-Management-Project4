@@ -1,5 +1,6 @@
 const express = require('express')
-const { book, getBooks } = require('../controllers/bookController')
+const { book, getBooks, getBooksById, updateBook, deleteBookById } = require('../controllers/bookController')
+const { review } = require('../controllers/reviewController')
 const { user, login } = require('../controllers/userController')
 const { tokenValidate } = require('../Middlewares/authMiddleware')
 const router = express.Router()
@@ -15,6 +16,12 @@ router.post('/login', login)
 
 router.post('/books', tokenValidate, book)
 router.get('/books', getBooks)
+router.get('/books/:bookId', getBooksById)
+router.put('/books/:bookId', tokenValidate, updateBook)
+router.delete('/books/:bookId', tokenValidate, deleteBookById)
+
+
+router.post('/books/:bookId/review', review)
 
 
 router.all("/*", function (req, res) { res.status(404).send({ status: false, msg: "Invalid HTTP request" }) })

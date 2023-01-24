@@ -25,12 +25,12 @@ const user = async function (req, res) {
         const validName = /^[a-z A-Z_]{3,20}$/
         const validNumber = (/^[6-9]\d{9}$/)
         const emailRegex = /^[a-z]{1}[a-z0-9._]{1,100}[@]{1}[a-z]{2,15}[.]{1}[a-z]{2,10}$/
-        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/;
 
         if (!validName.test(data.name)) return res.status(400).send({ status: false, Msg: "User Name can not contain numerical values or special characters" })
         if (!validNumber.test(data.phone)) return res.status(400).send({ status: false, Msg: "Phone Number should only contain 10 digits in it and should start with 6/7/8/9" })
         if (!emailRegex.test(data.email)) return res.status(400).send({ status: false, Msg: "email format is Invalid" })
-        if (!passwordRegex.test(data.password)) return res.status(400).send({ status: false, Msg: "Password should contain at least 8 characters with 1 upper and lower case" })
+        if (!passwordRegex.test(data.password)) return res.status(400).send({ status: false, Msg: "Password should contain at least 8 and max 15 characters with 1 upper, lower case and special char" })
 
         let findEmailPhone = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
         if (findEmailPhone) return res.status(403).send({ status: false, msg: "Email Id or Phone Number is already exist" })
