@@ -1,5 +1,6 @@
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
+const reviewModel = require('../models/reviewModel')
 const mongoose = require('mongoose')
 
 const book = async function (req, res) {
@@ -47,8 +48,10 @@ const getBooks = async function (req, res) {
 const getBooksById = async function (req, res) {
     let bookId = req.params.bookId
     let findBook = await bookModel.findById(bookId)
+    if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
     let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
-    return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: [] } })
+    let reviewsList = await reviewModel.find({ bookId: bookId }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+    return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: reviewsList } })
 }
 
 
@@ -60,14 +63,14 @@ const updateBook = async function (req, res) {
     if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
     let finalData = await bookModel.findOneAndUpdate({ _id: req.params.bookId, isDeleted: false }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
     if (!finalData) return res.status(404).send({ status: false, msg: "Document not found for update" })
-    res.status(200).send({ status: true, data: finalData })
+    return res.status(200).send({ status: true, data: finalData })
 }
 
 
-const deleteBookById = async function(req,res){
+const deleteBookById = async function (req, res) {
     let bookId = req.params.bookId
-        let deleteDoc = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true }, { new: true })
-        if (!deleteDoc) return res.status(404).send({ status: false, msg: "Document already deleted" })
-        res.status(200).send({ status: true, Info: "Document deleted successfully" })
+    let deleteDoc = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true }, { new: true })
+    if (!deleteDoc) return res.status(404).send({ status: false, msg: "Document already deleted" })
+    return res.status(200).send({ status: true, Info: "Document deleted successfully" })
 }
 module.exports = { book, getBooks, getBooksById, updateBook, deleteBookById }
