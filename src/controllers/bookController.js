@@ -1,7 +1,7 @@
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
-const moment = require('moment')
+// const moment = require('moment')
 const mongoose = require('mongoose')
 
 const book = async function (req, res) {
@@ -32,6 +32,8 @@ const book = async function (req, res) {
         let findISBN = await bookModel.findOne({$or:[{ISBN:ISBN},{title:title}]})
         if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number or Title already exists" })
 
+        if(!data.reviews==0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
+
         if(!dateFormat.test(releasedAt)) return res.status(400).send({ status: false, msg: "Date format is wrong" })
 
         let createBook = await bookModel.create(data)
@@ -56,6 +58,7 @@ const getBooks = async function (req, res) {
 const getBooksById = async function (req, res) {
     try {
         let bookId = req.params.bookId
+        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
         let findBook = await bookModel.findById(bookId)
         if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
@@ -70,7 +73,7 @@ const getBooksById = async function (req, res) {
 const updateBook = async function (req, res) {
     try {
         let data = req.body
-        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "request body cant be empty" })
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Request body can't be empty" })
         let { title, excerpt, releasedAt, ISBN } = data
         let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
         if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })

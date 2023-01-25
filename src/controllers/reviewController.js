@@ -6,6 +6,7 @@ const review = async function (req, res) {
     try {
         let data = req.body
         let { bookId, reviewedBy, reviewedAt, rating, review } = data
+        if(bookId!=req.params.bookId) return res.status(400).send({ status: false, msg: "bookId of path params and req body should be the same" })
 
         if (!bookId) return res.status(400).send({ status: false, msg: "bookId is mandatory" })
         if (!reviewedBy) return res.status(400).send({ status: false, msg: "reviewedBy is mandatory" })
@@ -30,7 +31,10 @@ const updateReview = async function (req, res) {
     try {
         let data = req.body
         let { rating } = data
+
+        if ((!mongoose.isValidObjectId(req.params.bookId))||(!mongoose.isValidObjectId(req.params.reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
         if (rating > 5 || rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
+        
         let findBook = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
         if (!findBook) return res.status(404).send({ status: false, msg: "No book found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
@@ -47,6 +51,7 @@ const deleteReview = async function (req, res) {
     try {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId
+        if ((!mongoose.isValidObjectId(bookId))||(!mongoose.isValidObjectId(reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
         let findReview = await reviewModel.findOne({ bookId: bookId, _id: reviewId })
         if (!findReview) return res.status(404).send({ status: false, msg: "No review found" })
         let deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true }, { new: true })
