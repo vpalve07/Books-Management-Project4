@@ -22,16 +22,28 @@ const review = async function (req, res) {
 }
 
 
-const updateReview = async function(req,res){
+const updateReview = async function (req, res) {
     let data = req.body
-    let{rating} = data
+    let { rating } = data
     if (rating > 5 || rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
     let findBook = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
     if (!findBook) return res.status(404).send({ status: false, msg: "No book found" })
-    let{_id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt} = findBook
-    let findReview = await reviewModel.findOneAndUpdate({bookId:req.params.bookId,_id:req.params.reviewId},data,{new:true}).select({isDeleted:0,createdAt:0,updatedAt:0,__v:0})
+    let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
+    let findReview = await reviewModel.findOneAndUpdate({ bookId: req.params.bookId, _id: req.params.reviewId }, data, { new: true }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
     if (!findReview) return res.status(404).send({ status: false, msg: "No review found" })
-    return res.status(200).send({ status: true, message: 'Books list', data:{_id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: findReview}})
+    return res.status(200).send({ status: true, message: 'Books list', data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: findReview } })
 }
 
-module.exports = { review, updateReview }
+
+const deleteReview = async function (req, res) {
+    let bookId = req.params.bookId
+    let reviewId = req.params.reviewId
+    let findReview = await reviewModel.findOne({ bookId: bookId, _id: reviewId })
+    if (!findReview) return res.status(404).send({ status: false, msg: "No review found" })
+    let deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true }, { new: true })
+    if (!deleteReview) return res.status(404).send({ status: false, msg: "Document already deleted" })
+    let decBookReview = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $inc: { reviews: -1 } }, { new: true })
+    return res.status(200).send({ status: true, Info: "Document deleted successfully" })
+}
+
+module.exports = { review, updateReview, deleteReview }

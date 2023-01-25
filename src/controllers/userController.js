@@ -12,10 +12,11 @@ const user = async function (req, res) {
         if (!phone) return res.status(400).send({ status: false, msg: "phone is mandatory" })
         if (!email) return res.status(400).send({ status: false, msg: "email is mandatory" })
         if (!password) return res.status(400).send({ status: false, msg: "password is mandatory" })
-        if (!address) return res.status(400).send({ status: false, msg: "address is mandatory" })
-        if (!address.street) return res.status(400).send({ status: false, msg: "street is mandatory in address" })
-        if (!address.city) return res.status(400).send({ status: false, msg: "city is mandatory in address" })
-        if (!address.pincode) return res.status(400).send({ status: false, msg: "pincode is mandatory in address" })
+        
+        // if (!address) return res.status(400).send({ status: false, msg: "address is mandatory" })
+        // if (!address.street) return res.status(400).send({ status: false, msg: "street is mandatory in address" })
+        // if (!address.city) return res.status(400).send({ status: false, msg: "city is mandatory in address" })
+        // if (!address.pincode) return res.status(400).send({ status: false, msg: "pincode is mandatory in address" })
 
         let titleEnum = userModel.schema.obj.title.enum
         if (!titleEnum.includes(data.title)) {
