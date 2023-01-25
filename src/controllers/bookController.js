@@ -1,11 +1,14 @@
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
+const moment = require('moment')
 const mongoose = require('mongoose')
 
 const book = async function (req, res) {
     try {
         let data = req.body
+
+        let dateFormat = /^(19|20)\d{2}\/(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])$/;
 
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
 
@@ -26,8 +29,10 @@ const book = async function (req, res) {
         const isbnRegex = /^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$/i
         if (!isbnRegex.test(data.ISBN)) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect 'ISBN number can be of either 10 or 13 digits and ISBN-13 starts with 978 or 979' some examples are - 1. (ISBN-10: 0-306-40615-2) 2. (ISBN-13: 978-0-306-40615-7) 3. (ISBN-13 with spaces: 978 0 306 40615 7)  4. (ISBN-13 with hyphens: 978-0-306-40615-7)  5. (ISBN-13 with ISBN prefix: ISBN 978-0-306-40615-7)  6. (ISBN-13 with ISBN-13 prefix: ISBN-13 978-0-306-40615-7)" })
 
-        let findISBN = await bookModel.findOne({ISBN:ISBN})
-        if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number already exists" })
+        let findISBN = await bookModel.findOne({$or:[{ISBN:ISBN},{title:title}]})
+        if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number or Title already exists" })
+
+        if(!dateFormat.test(releasedAt)) return res.status(400).send({ status: false, msg: "Date format is wrong" })
 
         let createBook = await bookModel.create(data)
         return res.status(201).send({ status: true, message: 'Success', data: createBook })
