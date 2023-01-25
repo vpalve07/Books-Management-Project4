@@ -12,7 +12,7 @@ const user = async function (req, res) {
         if (!phone) return res.status(400).send({ status: false, msg: "phone is mandatory" })
         if (!email) return res.status(400).send({ status: false, msg: "email is mandatory" })
         if (!password) return res.status(400).send({ status: false, msg: "password is mandatory" })
-        
+
         // if (!address) return res.status(400).send({ status: false, msg: "address is mandatory" })
         // if (!address.street) return res.status(400).send({ status: false, msg: "street is mandatory in address" })
         // if (!address.city) return res.status(400).send({ status: false, msg: "city is mandatory in address" })
@@ -57,7 +57,7 @@ const login = async function (req, res) {
         if (!findUser) res.status(400).send({ status: false, msg: "Invalid credentials" })
         let payload = { userId: findUser._id.toString(), email: findUser.email, iat: Math.floor(Date.now() / 1000) }  //,iat: Math.floor(Date.now() / 1000),exp: Math.floor(Date.now() / 1000) + (30 * 60)
         let token = jwt.sign(payload, 'group12', { expiresIn: '30m' })
-        return res.status(200).send({ status: true, message: 'Success' ,data: token })
+        return res.status(200).send({ status: true, message: 'Success', data: token })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
     }

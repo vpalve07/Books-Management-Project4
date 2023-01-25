@@ -46,31 +46,43 @@ const getBooks = async function (req, res) {
 
 
 const getBooksById = async function (req, res) {
-    let bookId = req.params.bookId
-    let findBook = await bookModel.findById(bookId)
-    if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
-    let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
-    let reviewsList = await reviewModel.find({ bookId: bookId }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
-    return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: reviewsList } })
+    try {
+        let bookId = req.params.bookId
+        let findBook = await bookModel.findById(bookId)
+        if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
+        let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
+        let reviewsList = await reviewModel.find({ bookId: bookId }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: reviewsList } })
+    } catch (error) {
+        return res.status(500).send({ errorMsg: error.message })
+    }
 }
 
 
 const updateBook = async function (req, res) {
-    let data = req.body
-    if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "request body cant be empty" })
-    let { title, excerpt, releasedAt, ISBN } = data
-    let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
-    if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
-    let finalData = await bookModel.findOneAndUpdate({ _id: req.params.bookId, isDeleted: false }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
-    if (!finalData) return res.status(404).send({ status: false, msg: "Document not found for update" })
-    return res.status(200).send({ status: true, data: finalData })
+    try {
+        let data = req.body
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "request body cant be empty" })
+        let { title, excerpt, releasedAt, ISBN } = data
+        let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
+        if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
+        let finalData = await bookModel.findOneAndUpdate({ _id: req.params.bookId, isDeleted: false }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
+        if (!finalData) return res.status(404).send({ status: false, msg: "Document not found for update" })
+        return res.status(200).send({ status: true, data: finalData })
+    } catch (error) {
+        return res.status(500).send({ errorMsg: error.message })
+    }
 }
 
 
 const deleteBookById = async function (req, res) {
-    let bookId = req.params.bookId
-    let deleteDoc = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true }, { new: true })
-    if (!deleteDoc) return res.status(404).send({ status: false, msg: "Document already deleted" })
-    return res.status(200).send({ status: true, Info: "Document deleted successfully" })
+    try {
+        let bookId = req.params.bookId
+        let deleteDoc = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { isDeleted: true }, { new: true })
+        if (!deleteDoc) return res.status(404).send({ status: false, msg: "Document already deleted" })
+        return res.status(200).send({ status: true, Info: "Document deleted successfully" })
+    } catch (error) {
+        return res.status(500).send({ errorMsg: error.message })
+    }
 }
 module.exports = { book, getBooks, getBooksById, updateBook, deleteBookById }
