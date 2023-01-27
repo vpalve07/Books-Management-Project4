@@ -10,7 +10,8 @@ const review = async function (req, res) {
         if (!data.bookId) return res.status(400).send({ status: false, msg: "bookId is mandatory" })
         if (!data.reviewedAt) return res.status(400).send({ status: false, msg: "reviewedAt is mandatory" })
         if (!data.rating) return res.status(400).send({ status: false, msg: "rating is mandatory" })
-        if (data.rating > 5 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
+        if (data.rating >= 5.1 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
+        data.rating = Math.round(data.rating)
 
         if (!mongoose.isValidObjectId(data.bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
 
