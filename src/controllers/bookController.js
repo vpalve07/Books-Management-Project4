@@ -14,6 +14,7 @@ const book = async function (req, res) {
 
         if (!title) return res.status(400).send({ status: false, msg: "title is mandatory" })
         if (!excerpt) return res.status(400).send({ status: false, msg: "excerpt is mandatory" })
+        if (!userId) return res.status(400).send({ status: false, msg: "userId is mandatory" })
         if (!ISBN) return res.status(400).send({ status: false, msg: "ISBN is mandatory" })
         if (!category) return res.status(400).send({ status: false, msg: "category is mandatory" })
         if (!subcategory) return res.status(400).send({ status: false, msg: "subcategory is mandatory" })

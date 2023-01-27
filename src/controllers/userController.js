@@ -54,9 +54,10 @@ const login = async function (req, res) {
         if (Object.keys(data).length > 2) return res.status(400).send({ status: false, msg: "request body can only contain email and password" })
 
         let findUser = await userModel.findOne(data)
-        if (!findUser) res.status(400).send({ status: false, msg: "Invalid credentials" })
+        if (!findUser) return res.status(400).send({ status: false, msg: "Invalid credentials" })
         let payload = { userId: findUser._id.toString(), email: findUser.email, iat: Math.floor(Date.now() / 1000) }  //,iat: Math.floor(Date.now() / 1000),exp: Math.floor(Date.now() / 1000) + (30 * 60)
         let token = jwt.sign(payload, 'group12', { expiresIn: '30m' })
+        res.setHeader('x-api-key',token)
         return res.status(200).send({ status: true, message: 'Success', data: token })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })

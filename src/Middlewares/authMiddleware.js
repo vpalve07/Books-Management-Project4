@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 
 const tokenValidate = async function (req, res, next) {
     try {
-        let token = req.headers.token
+        let token = req.headers['x-api-key']
         if (!token) return res.status(400).send({ status: false, msg: "Token is required" })
 
         try {
@@ -19,7 +19,7 @@ const tokenValidate = async function (req, res, next) {
         if (req.body.userId) if (!mongoose.isValidObjectId(req.body.userId)) return res.status(400).send({ status: false, msg: "userId of req body is invalid" })
         if (req.params.bookId) if (!mongoose.isValidObjectId(req.params.bookId)) return res.status(400).send({ status: false, msg: "bookId of path params is invalid" })
 
-        if (req.body.userId) if (req.decoded.userId != req.body.userId) return res.status(400).send({ status: false, msg: "Can not Create a book with provided userId" })
+        if (req.body.userId) if (req.decoded.userId != req.body.userId) return res.status(400).send({ status: false, msg: "Your userId and token is not matched" })
 
         let findBook
         if (req.params.bookId) findBook = await bookModel.findById(req.params.bookId)

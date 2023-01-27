@@ -4,7 +4,6 @@ const mongoose = require('mongoose')
 
 const app = express()
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
 
 mongoose.set('strictQuery', false)
 mongoose.connect("mongodb+srv://group12Database:group12Database@bookman.wjkwpbq.mongodb.net/group12Database", {
