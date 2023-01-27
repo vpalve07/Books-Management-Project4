@@ -20,7 +20,8 @@ const bookSchema = new mongoose.Schema({
     ISBN: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     category: {
         type: String,
@@ -46,7 +47,7 @@ const bookSchema = new mongoose.Schema({
     releasedAt: {
         type: Date,
         required: true,
-        trim:true
+        trim: true
     }
 }, { timestamps: true })
 
