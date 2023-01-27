@@ -34,7 +34,7 @@ const user = async function (req, res) {
         if (!passwordRegex.test(data.password)) return res.status(400).send({ status: false, Msg: "Password should contain at least 8 and max 15 characters with 1 upper, lower case and special char" })
 
         let findEmailPhone = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
-        if (findEmailPhone) return res.status(403).send({ status: false, msg: "Email Id or Phone Number is already exist" })
+        if (findEmailPhone) return res.status(400).send({ status: false, msg: "Email Id or Phone Number is already exist" })
 
         let createUser = await userModel.create(data)
         return res.status(201).send({ status: true, message: 'Success', data: createUser })
