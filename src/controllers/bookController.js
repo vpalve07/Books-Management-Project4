@@ -31,11 +31,11 @@ const book = async function (req, res) {
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
         if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect 'ISBN number can be of either 10 or 13 digits and ISBN-13 starts with 978 or 979' some examples are - 1. (ISBN-10: 0-306-40615-2) 2. (ISBN-13: 978-0-306-40615-7) 3. (ISBN-13 with spaces: 978 0 306 40615 7)  4. (ISBN-13 with hyphens: 978-0-306-40615-7)  5. (ISBN-13 with ISBN prefix: ISBN 978-0-306-40615-7)  6. (ISBN-13 with ISBN-13 prefix: ISBN-13 978-0-306-40615-7)" })
 
-        let findISBN = await bookModel.findOne({ $or: [{ ISBN: ISBN }, { title: title }] })
+        let findISBN = await bookModel.findOne({$or:[{ISBN:ISBN},{title:title}]})
         if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number or Title already exists" })
 
-        if (!data.reviews == 0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
-        if (!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
+        if(!data.reviews==0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
+        if(!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
 
         let createBook = await bookModel.create(data)
         return res.status(201).send({ status: true, message: 'Success', data: createBook })
@@ -47,16 +47,16 @@ const book = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let query = req.query
-        let { userId, category, subcategory, title, excerpt, ISBN, reviews } = query
-        if (Object.keys(query).length == 0) {
+        let {userId,category,subcategory,title,excerpt,ISBN,reviews} = query
+        if(Object.keys(query).length==0){
             let findBook = await bookModel.find({ isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
             if (findBook.length == 0) return res.status(404).send({ status: false, msg: "No book found" })
             return res.status(200).send({ status: true, message: "Success", data: findBook })
         }
-        if (title || excerpt || ISBN || reviews) return res.status(400).send({ status: false, msg: "You can only fetch books by its userId,category,subcategory" })
+        if(title||excerpt||ISBN||reviews) return res.status(400).send({ status: false, msg: "You can only fetch books by its userId,category,subcategory" })
 
-        if (userId || category || subcategory) {
-            let findBook = await bookModel.find(query, { isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
+        if(userId||category||subcategory) {
+            let findBook = await bookModel.find(query,{ isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
             if (findBook.length == 0) return res.status(404).send({ status: false, msg: "No book found" })
             return res.status(200).send({ status: true, message: "Success", data: findBook })
         }
