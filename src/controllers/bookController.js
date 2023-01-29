@@ -29,7 +29,7 @@ const book = async function (req, res) {
         if (!validUser) return res.status(400).send({ status: false, msg: "User not found with the provided UserID" })
 
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
-        if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect 'ISBN number can be of either 10 or 13 digits and ISBN-13 starts with 978 or 979' some examples are - 1. (ISBN-10: 0-306-40615-2) 2. (ISBN-13: 978-0-306-40615-7) 3. (ISBN-13 with spaces: 978 0 306 40615 7)  4. (ISBN-13 with hyphens: 978-0-306-40615-7)  5. (ISBN-13 with ISBN prefix: ISBN 978-0-306-40615-7)  6. (ISBN-13 with ISBN-13 prefix: ISBN-13 978-0-306-40615-7)" })
+        if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
 
         let findISBN = await bookModel.findOne({ISBN:ISBN})
         let findTitle = await bookModel.findOne({title:data.title})
@@ -91,6 +91,10 @@ const updateBook = async function (req, res) {
         let data = req.body
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, msg: "Request body can't be empty" })
         let { title, excerpt, releasedAt, ISBN } = data
+
+        const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
+        if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
+        
         let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
         if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
         let finalData = await bookModel.findOneAndUpdate({ _id: req.params.bookId, isDeleted: false }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
