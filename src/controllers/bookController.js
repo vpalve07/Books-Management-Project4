@@ -74,7 +74,7 @@ const getBooksById = async function (req, res) {
     try {
         let bookId = req.params.bookId
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
-        let findBook = await bookModel.findOne({ bookId: bookId , isDeleted:false})
+        let findBook = await bookModel.findOne({ _id: bookId , isDeleted:false})
         if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
         let reviewsList = await reviewModel.find({ bookId: bookId , isDeleted:false}).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
