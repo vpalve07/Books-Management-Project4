@@ -78,7 +78,7 @@ const getBooksById = async function (req, res) {
         let findBook = await bookModel.findById(bookId)
         if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
-        let reviewsList = await reviewModel.find({ bookId: bookId }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        let reviewsList = await reviewModel.find({ bookId: bookId , isDeleted:false}).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
         return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: reviewsList } })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
@@ -94,7 +94,7 @@ const updateBook = async function (req, res) {
 
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
         if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
-        
+
         let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
         if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
         let finalData = await bookModel.findOneAndUpdate({ _id: req.params.bookId, isDeleted: false }, { $set: { title: title, excerpt: excerpt, releasedAt: releasedAt, ISBN: ISBN } }, { new: true })
