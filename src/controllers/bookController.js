@@ -1,7 +1,6 @@
 const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
-// const moment = require('moment')
 const mongoose = require('mongoose')
 
 const book = async function (req, res) {
