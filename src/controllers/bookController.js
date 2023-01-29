@@ -8,7 +8,7 @@ const book = async function (req, res) {
     try {
         let data = req.body
 
-        let dateFormat = /^(19|20)\d{2}\/(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])$/;
+        let dateFormat = /^(19|20)\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|1\d|2\d|3[01])$/;
 
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
 
@@ -31,8 +31,11 @@ const book = async function (req, res) {
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
         if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect 'ISBN number can be of either 10 or 13 digits and ISBN-13 starts with 978 or 979' some examples are - 1. (ISBN-10: 0-306-40615-2) 2. (ISBN-13: 978-0-306-40615-7) 3. (ISBN-13 with spaces: 978 0 306 40615 7)  4. (ISBN-13 with hyphens: 978-0-306-40615-7)  5. (ISBN-13 with ISBN prefix: ISBN 978-0-306-40615-7)  6. (ISBN-13 with ISBN-13 prefix: ISBN-13 978-0-306-40615-7)" })
 
-        let findISBN = await bookModel.findOne({$or:[{ISBN:ISBN},{title:title}]})
-        if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number or Title already exists" })
+        let findISBN = await bookModel.findOne({ISBN:ISBN})
+        let findTitle = await bookModel.findOne({title:data.title})
+
+        if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number already exists" })
+        if (findTitle) return res.status(400).send({ status: false, msg: "Title already exists" })
 
         if(!data.reviews==0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
         if(!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
