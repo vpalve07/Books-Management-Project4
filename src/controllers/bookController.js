@@ -51,6 +51,7 @@ const getBooks = async function (req, res) {
     try {
         let query = req.query
         let {userId,category,subcategory,title,excerpt,ISBN,reviews} = query
+        if(userId) if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId is invalid" })
         if(Object.keys(query).length==0){
             let findBook = await bookModel.find({ isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
             if (findBook.length == 0) return res.status(404).send({ status: false, msg: "No book found" })
