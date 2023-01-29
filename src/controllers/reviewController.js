@@ -14,6 +14,9 @@ const review = async function (req, res) {
         data.rating = Math.round(data.rating)
         if(data.review == "") return res.status(400).send({ status: false, msg: "review field can not be empty" })
 
+        let dateFormat = /^(19|20)\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|1\d|2\d|3[01])$/;
+        if(!dateFormat.test(reviewedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
+
         if (!mongoose.isValidObjectId(data.bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
 
         let findBook = await bookModel.findOneAndUpdate({ _id: data.bookId, isDeleted: false }, { $inc: { reviews: 1 } }, { new: true })
