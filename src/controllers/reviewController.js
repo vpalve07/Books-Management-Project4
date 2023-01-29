@@ -8,6 +8,7 @@ const review = async function (req, res) {
         if (data.bookId != req.params.bookId) return res.status(400).send({ status: false, msg: "bookId of path params and req body should be the same" })
 
         if (!data.bookId) return res.status(400).send({ status: false, msg: "bookId is mandatory" })
+        if (!data.reviewedBy) data.reviewedBy='Guest'
         if (!data.reviewedAt) return res.status(400).send({ status: false, msg: "reviewedAt is mandatory" })
         if (!data.rating) return res.status(400).send({ status: false, msg: "rating is mandatory" })
         if (data.rating >= 5.1 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
