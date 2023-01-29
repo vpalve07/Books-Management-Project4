@@ -34,7 +34,8 @@ const updateReview = async function (req, res) {
 
         if ((!mongoose.isValidObjectId(req.params.bookId)) || (!mongoose.isValidObjectId(req.params.reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
         if (data.rating > 5 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
-
+        data.rating = Math.round(data.rating)
+        
         let findBook = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
         if (!findBook) return res.status(404).send({ status: false, msg: "No book found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
