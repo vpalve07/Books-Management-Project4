@@ -28,7 +28,7 @@ const user = async function (req, res) {
 
         let findEmailPhone = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
         if (findEmailPhone) return res.status(400).send({ status: false, msg: "Email Id or Phone Number is already exist" })
-        if(address) if(!address.street||!address.city||!address.pincode) return res.status(400).send({ status: false, msg: "address should contain 'street','city','pincode'" })
+        if(address||address=="") if(!address.street||!address.city||!address.pincode) return res.status(400).send({ status: false, msg: "address should contain 'street','city','pincode'" })
 
         let createUser = await userModel.create(data)
         return res.status(201).send({ status: true, message: 'Success', data: createUser })
