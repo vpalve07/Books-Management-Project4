@@ -37,13 +37,15 @@ const updateReview = async function (req, res) {
         let data = req.body
 
         if ((!mongoose.isValidObjectId(req.params.bookId)) || (!mongoose.isValidObjectId(req.params.reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
+        
+        if(data.review==""||data.reviewedBy=="") return res.status(400).send({ status: false, msg: "Please put value for field" })
         if (data.rating > 5 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
         data.rating = Math.round(data.rating)
 
         let findBook = await bookModel.findOne({ _id: req.params.bookId, isDeleted: false })
         if (!findBook) return res.status(404).send({ status: false, msg: "No book found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
-        let findReview = await reviewModel.findOneAndUpdate({ bookId: req.params.bookId, _id: req.params.reviewId }, data, { new: true }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        let findReview = await reviewModel.findOneAndUpdate({ bookId: req.params.bookId, _id: req.params.reviewId },{review:data.review,rating:data.rating,reviewedBy:data.reviewedBy}, { new: true }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
         if (!findReview) return res.status(404).send({ status: false, msg: "No review found" })
         return res.status(200).send({ status: true, message: 'Books list', data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: findReview } })
     } catch (error) {
