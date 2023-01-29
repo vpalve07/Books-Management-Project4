@@ -33,6 +33,7 @@ const user = async function (req, res) {
         if (!emailRegex.test(data.email)) return res.status(400).send({ status: false, Msg: "email format is Invalid" })
         if (!passwordRegex.test(data.password)) return res.status(400).send({ status: false, Msg: "Password should contain at least 8 and max 15 characters with 1 upper, lower case and special char" })
 
+        if(address) if(!address.street||!address.city||!address.pincode) return res.status(400).send({ status: false, msg: "address should contain 'street','city','pincode'" })
         let findEmailPhone = await userModel.findOne({ $or: [{ email: email }, { phone: phone }] })
         if (findEmailPhone) return res.status(400).send({ status: false, msg: "Email Id or Phone Number is already exist" })
 
