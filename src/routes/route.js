@@ -26,6 +26,6 @@ router.put('/books/:bookId/review/:reviewId', updateReview)
 router.delete('/books/:bookId/review/:reviewId', deleteReview)
 
 
-router.all("/*", function (req, res) { res.status(404).send({ status: false, msg: "Invalid HTTP request" }) })
+// router.all("/*", function (req, res) { res.status(404).send({ status: false, msg: "Invalid HTTP request" }) })
 
 module.exports = router
