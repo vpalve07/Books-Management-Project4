@@ -92,7 +92,7 @@ const updateBook = async function (req, res) {
         let { title, excerpt, releasedAt, ISBN } = data
 
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
-        if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
+        if(data.ISBN) if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
 
         let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
         if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
