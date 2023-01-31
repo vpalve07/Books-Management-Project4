@@ -2,11 +2,12 @@ const bookModel = require('../models/bookModel')
 const userModel = require('../models/userModel')
 const reviewModel = require('../models/reviewModel')
 const mongoose = require('mongoose')
+const aws= require("aws-sdk")
 
 const book = async function (req, res) {
     try {
         let data = req.body
-
+        console.log(data)
         let dateFormat = /^(19|20)\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|1\d|2\d|3[01])$/;
 
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
@@ -30,14 +31,68 @@ const book = async function (req, res) {
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
         if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
 
-        let findISBN = await bookModel.findOne({ISBN:ISBN})
-        let findTitle = await bookModel.findOne({title:data.title})
+        let findISBN = await bookModel.findOne({ ISBN: ISBN })
+        let findTitle = await bookModel.findOne({ title: data.title })
 
         if (findISBN) return res.status(400).send({ status: false, msg: "ISBN number already exists" })
         if (findTitle) return res.status(400).send({ status: false, msg: "Title already exists" })
 
-        if(!data.reviews==0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
-        if(!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
+        if (!data.reviews == 0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
+        if (!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
+
+
+
+        aws.config.update({
+            accessKeyId: "AKIAY3L35MCRZNIRGT6N",
+            secretAccessKey: "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",
+            region: "ap-south-1"
+        })
+
+        let uploadFile = async (file) => {
+            return new Promise(function (resolve, reject) {
+                // this function will upload file to aws and return the link
+                let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
+
+                var uploadParams = {
+                    ACL: "public-read",
+                    Bucket: "classroom-training-bucket",  //HERE
+                    Key: "bookCover/" + file.originalname, //HERE 
+                    Body: file.buffer
+                }
+
+
+                s3.upload(uploadParams, function (err, data) {
+                    if (err) {
+                        return reject({ "error": err })
+                    }
+                    console.log(data)
+                    console.log("file uploaded succesfully")
+                    return resolve(data.Location)
+                })
+
+                // let data= await s3.upload( uploadParams)
+                // if( data) return data.Location
+                // else return "there is an error"
+
+            })
+        }
+
+
+        let files = req.files
+        console.log(files)
+        if (files && files.length > 0) {
+            //upload to s3 and get the uploaded link
+            // res.send the link back to frontend/postman
+            let uploadedFileURL = await uploadFile(files[0])
+            data.bookCover = uploadedFileURL
+            let createBook = await bookModel.create(data)
+            return res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
+        }
+        else {
+            return res.status(400).send({ msg: "No file found" })
+        }
+
+
 
         let createBook = await bookModel.create(data)
         return res.status(201).send({ status: true, message: 'Success', data: createBook })
@@ -49,18 +104,18 @@ const book = async function (req, res) {
 const getBooks = async function (req, res) {
     try {
         let query = req.query
-        let {userId,category,subcategory,title,excerpt,ISBN,reviews} = query
-        if(userId==""||category==""||subcategory=="") return res.status(400).send({ status: false, msg: "query params value can't be empty" })
-        if(userId) if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId is invalid" })
-        if(Object.keys(query).length==0){
+        let { userId, category, subcategory, title, excerpt, ISBN, reviews } = query
+        if (userId == "" || category == "" || subcategory == "") return res.status(400).send({ status: false, msg: "query params value can't be empty" })
+        if (userId) if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId is invalid" })
+        if (Object.keys(query).length == 0) {
             let findBook = await bookModel.find({ isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
             if (findBook.length == 0) return res.status(404).send({ status: false, msg: "No book found" })
             return res.status(200).send({ status: true, message: "Success", data: findBook })
         }
-        if(title||excerpt||ISBN||reviews) return res.status(400).send({ status: false, msg: "You can only fetch books by its userId,category,subcategory" })
+        if (title || excerpt || ISBN || reviews) return res.status(400).send({ status: false, msg: "You can only fetch books by its userId,category,subcategory" })
 
-        if(userId||category||subcategory) {
-            let findBook = await bookModel.find(query,{ isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
+        if (userId || category || subcategory) {
+            let findBook = await bookModel.find(query, { isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 }).sort({ title: 1 })
             if (findBook.length == 0) return res.status(404).send({ status: false, msg: "No book found" })
             return res.status(200).send({ status: true, message: "Success", data: findBook })
         }
@@ -74,10 +129,10 @@ const getBooksById = async function (req, res) {
     try {
         let bookId = req.params.bookId
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
-        let findBook = await bookModel.findOne({ _id: bookId , isDeleted:false})
+        let findBook = await bookModel.findOne({ _id: bookId, isDeleted: false })
         if (!findBook) return res.status(404).send({ status: false, msg: "Book not found" })
         let { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt } = findBook
-        let reviewsList = await reviewModel.find({ bookId: bookId , isDeleted:false}).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
+        let reviewsList = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ isDeleted: 0, createdAt: 0, updatedAt: 0, __v: 0 })
         return res.status(200).send({ status: true, message: "Book List", data: { _id, title, excerpt, userId, category, subcategory, isDeleted, reviews, releasedAt, createdAt, updatedAt, reviewsData: reviewsList } })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
@@ -92,7 +147,7 @@ const updateBook = async function (req, res) {
         let { title, excerpt, releasedAt, ISBN } = data
 
         const isbnRegex = (/^(?=(?:\D*\d){13}(?:(?:\D*\d){3})?$)[\d-]+$/g)
-        if(data.ISBN) if(!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
+        if (data.ISBN) if (!isbnRegex.test(data.ISBN.trim())) return res.status(400).send({ status: false, msg: "ISBN number format is incorrect" })
 
         let exist = await bookModel.findOne({ $or: [{ title: title }, { ISBN: ISBN }] })
         if (exist) return res.status(400).send({ status: false, msg: "Can not update unique fields which are already exist" })
