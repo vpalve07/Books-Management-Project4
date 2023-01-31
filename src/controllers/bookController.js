@@ -6,7 +6,7 @@ const aws= require("aws-sdk")
 
 const book = async function (req, res) {
     try {
-        let data = req.body
+        let data = JSON.parse(req.body.data)
         console.log(data)
         let dateFormat = /^(19|20)\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|1\d|2\d|3[01])$/;
 
@@ -65,8 +65,6 @@ const book = async function (req, res) {
                     if (err) {
                         return reject({ "error": err })
                     }
-                    console.log(data)
-                    console.log("file uploaded succesfully")
                     return resolve(data.Location)
                 })
 
@@ -79,7 +77,6 @@ const book = async function (req, res) {
 
 
         let files = req.files
-        console.log(files)
         if (files && files.length > 0) {
             //upload to s3 and get the uploaded link
             // res.send the link back to frontend/postman
