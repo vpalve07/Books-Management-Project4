@@ -40,50 +40,19 @@ const book = async function (req, res) {
         if (!data.reviews == 0) return res.status(400).send({ status: false, msg: "Review count can not be greater or lesser than 0 at the time of creation of book" })
         if (!dateFormat.test(releasedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
 
-
-
-        aws.config.update({
-            accessKeyId: "AKIAY3L35MCRZNIRGT6N",
-            secretAccessKey: "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",
-            region: "ap-south-1"
-        })
-
-        let uploadFile = async (file) => {
-            return new Promise(function (resolve, reject) {
-                // this function will upload file to aws and return the link
-                let s3 = new aws.S3({ apiVersion: '2006-03-01' }); // we will be using the s3 service of aws
-
-                var uploadParams = {
-                    ACL: "public-read",
-                    Bucket: "classroom-training-bucket",  //HERE
-                    Key: "bookCover/" + file.originalname, //HERE 
-                    Body: file.buffer
-                }
-
-                s3.upload(uploadParams, function (err, data) {
-                    if (err) {
-                        return reject({ "error": err })
-                    }
-                    return resolve(data.Location)
-                })
-
-            })
-        }
-
-
         let files = req.files
         if (files && files.length > 0) {
             let uploadedFileURL = await uploadFile(files[0])
             data.bookCover = uploadedFileURL
-            let createBook = await bookModel.create(data)
-            return res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
+            // let createBook = await bookModel.create(data)
+            // return res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
         }
         else {
             return res.status(400).send({ msg: "No file found" })
         }
 
-        // let createBook = await bookModel.create(data)
-        // return res.status(201).send({ status: true, message: 'Success', data: createBook })
+        let createBook = await bookModel.create(data)
+        return res.status(201).send({ status: true, message: 'Success', data: createBook })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
     }
