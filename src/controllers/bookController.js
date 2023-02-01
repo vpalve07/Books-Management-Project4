@@ -43,8 +43,6 @@ const book = async function (req, res) {
         if (files && files.length > 0) {
             let uploadedFileURL = await uploadFile(files[0])
             data.bookCover = uploadedFileURL
-            // let createBook = await bookModel.create(data)
-            // return res.status(201).send({ msg: "file uploaded succesfully", data: uploadedFileURL })
         }
         else {
             return res.status(400).send({ msg: "No file found" })
