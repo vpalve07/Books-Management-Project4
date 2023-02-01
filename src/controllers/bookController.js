@@ -60,7 +60,6 @@ const book = async function (req, res) {
                     Body: file.buffer
                 }
 
-
                 s3.upload(uploadParams, function (err, data) {
                     if (err) {
                         return reject({ "error": err })
@@ -68,18 +67,12 @@ const book = async function (req, res) {
                     return resolve(data.Location)
                 })
 
-                // let data= await s3.upload( uploadParams)
-                // if( data) return data.Location
-                // else return "there is an error"
-
             })
         }
 
 
         let files = req.files
         if (files && files.length > 0) {
-            //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL = await uploadFile(files[0])
             data.bookCover = uploadedFileURL
             let createBook = await bookModel.create(data)
@@ -89,10 +82,8 @@ const book = async function (req, res) {
             return res.status(400).send({ msg: "No file found" })
         }
 
-
-
-        let createBook = await bookModel.create(data)
-        return res.status(201).send({ status: true, message: 'Success', data: createBook })
+        // let createBook = await bookModel.create(data)
+        // return res.status(201).send({ status: true, message: 'Success', data: createBook })
     } catch (error) {
         return res.status(500).send({ errorMsg: error.message })
     }
