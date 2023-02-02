@@ -17,8 +17,8 @@ const tokenValidate = async function (req, res, next) {
         }
 
         if(req.body.userId) req.body.userId = (req.body.userId).trim()
-        if (req.body.userId) if (!mongoose.isValidObjectId(req.body.userId)) return res.status(400).send({ status: false, msg: "userId of req body is invalid" })
-        if (req.params.bookId) if (!mongoose.isValidObjectId(req.params.bookId)) return res.status(400).send({ status: false, msg: "bookId of path params is invalid" })
+        // if (req.body.userId) if (!mongoose.isValidObjectId(req.body.userId)) return res.status(400).send({ status: false, msg: "userId of req body is invalid" })
+        // if (req.params.bookId) if (!mongoose.isValidObjectId(req.params.bookId)) return res.status(400).send({ status: false, msg: "bookId of path params is invalid" })
 
         if (req.body.userId) if (req.decoded.userId != req.body.userId) return res.status(400).send({ status: false, msg: "Your userId and token is not matched" })
 

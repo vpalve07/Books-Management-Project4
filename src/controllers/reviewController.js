@@ -18,7 +18,7 @@ const review = async function (req, res) {
         let dateFormat = /^(19|20)\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|1\d|2\d|3[01])$/;
         if(!dateFormat.test(data.reviewedAt.trim())) return res.status(400).send({ status: false, msg: "Date format is wrong" })
 
-        if (!mongoose.isValidObjectId(data.bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
+        // if (!mongoose.isValidObjectId(data.bookId)) return res.status(400).send({ status: false, msg: "bookId is invalid" })
 
         let findBook = await bookModel.findOneAndUpdate({ _id: data.bookId, isDeleted: false }, { $inc: { reviews: 1 } }, { new: true })
         if (!findBook) return res.status(404).send({ status: false, msg: "No book found" })
@@ -36,7 +36,7 @@ const updateReview = async function (req, res) {
     try {
         let data = req.body
 
-        if ((!mongoose.isValidObjectId(req.params.bookId)) || (!mongoose.isValidObjectId(req.params.reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
+        // if ((!mongoose.isValidObjectId(req.params.bookId)) || (!mongoose.isValidObjectId(req.params.reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
         
         if(data.review==""||data.reviewedBy=="") return res.status(400).send({ status: false, msg: "Please put value for field" })
         if (data.rating > 5 || data.rating < 1) return res.status(400).send({ status: false, msg: "please rate in between 1 to 5" })
@@ -58,7 +58,7 @@ const deleteReview = async function (req, res) {
     try {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId
-        if ((!mongoose.isValidObjectId(bookId)) || (!mongoose.isValidObjectId(reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
+        // if ((!mongoose.isValidObjectId(bookId)) || (!mongoose.isValidObjectId(reviewId))) return res.status(400).send({ status: false, msg: "bookId or reviewId is invalid" })
         let findReview = await reviewModel.findOne({ bookId: bookId, _id: reviewId })
         if (!findReview) return res.status(404).send({ status: false, msg: "No review found" })
         let deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true }, { new: true })
